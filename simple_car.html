@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Car Price Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #eef2ff;
+    min-height: 100vh;
+    padding: 30px 16px 50px;
+  }
+ 
+  /* ── PAGE HEADER ── */
+  .page-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+ 
+  .page-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e1b4b;
+  }
+ 
+  .page-header p {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+  }
+ 
+  .tag {
+    display: inline-block;
+    background: #4f6ef7;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 12px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+ 
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+ 
+  /* ── CARD ── */
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 26px 24px;
+    box-shadow: 0 2px 16px rgba(79,110,247,0.08);
+  }
+ 
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #f0f0f8;
+  }
+ 
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #eef2ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+ 
+  .card-head h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e1b4b;
+  }
+ 
+  /* ── FORM ── */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+ 
+  .field {
+    margin-bottom: 14px;
+  }
+ 
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 5px;
+  }
+ 
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: #1e1b4b;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+ 
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aaa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+ 
+  .field input:focus,
+  .field select:focus {
+    border-color: #4f6ef7;
+    background: #fff;
+  }
+ 
+  .field input::placeholder { color: #ccc; }
+ 
+  /* ── BUTTON ── */
+  .btn-predict {
+    width: 100%;
+    padding: 13px;
+    background: #4f6ef7;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+ 
+  .btn-predict:hover {
+    background: #3a56e0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79,110,247,0.3);
+  }
+ 
+  .btn-predict:active { transform: translateY(0); }
+ 
+  .btn-reset {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: #999;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+ 
+  .btn-reset:hover { border-color: #4f6ef7; color: #4f6ef7; }
+ 
+  /* ── RESULT CARD ── */
+  .result-card {
+    display: none;
+    background: linear-gradient(135deg, #4f6ef7 0%, #6c3fd6 100%);
+    border-radius: 18px;
+    padding: 26px 24px;
+    color: #fff;
+    animation: fadeUp 0.35s ease;
+  }
+ 
+  .result-card.show { display: block; }
+ 
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+ 
+  .result-label {
+    font-size: 12px;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+ 
+  .result-price {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+ 
+  .result-price sup { font-size: 22px; font-weight: 500; opacity: 0.8; vertical-align: top; margin-top: 10px; margin-right: 2px; }
+  .result-price sub { font-size: 16px; opacity: 0.7; font-weight: 400; }
+ 
+  .result-car-name {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-bottom: 20px;
+  }
+ 
+  .result-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+ 
+  .r-metric {
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+  }
+ 
+  .r-metric-val {
+    font-size: 18px;
+    font-weight: 700;
+  }
+ 
+  .r-metric-lbl {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+ 
+  /* depreciation bar */
+  .dep-bar-wrap {
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+ 
+  .dep-bar-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+ 
+  .dep-bar-track {
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+  }
+ 
+  .dep-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: #fff;
+    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+    width: 0%;
+  }
+ 
+  /* ── RIGHT COLUMN ── */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+ 
+  /* ── FEATURE IMPORTANCE ── */
+  .fi-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+ 
+  .fi-row:last-child { margin-bottom: 0; }
+ 
+  .fi-label {
+    width: 115px;
+    font-size: 12px;
+    color: #555;
+    flex-shrink: 0;
+    text-align: right;
+  }
+ 
+  .fi-track {
+    flex: 1;
+    height: 9px;
+    background: #eef2ff;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+ 
+  .fi-fill {
+    height: 100%;
+    border-radius: 100px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.2s cubic-bezier(0.16,1,0.3,1);
+  }
+ 
+  .fi-fill.c1 { background: #4f6ef7; }
+  .fi-fill.c2 { background: #6c3fd6; }
+  .fi-fill.c3 { background: #06b6d4; }
+  .fi-fill.c4 { background: #f59e0b; }
+  .fi-fill.c5 { background: #10b981; }
+  .fi-fill.c6 { background: #f472b6; }
+  .fi-fill.c7 { background: #94a3b8; }
+ 
+  .fi-pct {
+    width: 34px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e1b4b;
+    text-align: right;
+    flex-shrink: 0;
+  }
+ 
+  /* ── MODEL COMPARISON ── */
+  .model-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fafafa;
+    border: 1.5px solid #f0f0f8;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+ 
+  .model-row:last-child { margin-bottom: 0; }
+ 
+  .model-row.best {
+    border-color: #4f6ef7;
+    background: #eef2ff;
+  }
+ 
+  .model-left { display: flex; align-items: center; gap: 10px; }
+ 
+  .model-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    flex-shrink: 0;
+  }
+ 
+  .model-row.best .model-dot { background: #4f6ef7; }
+ 
+  .model-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e1b4b;
+  }
+ 
+  .model-desc {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 1px;
+  }
+ 
+  .model-score {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4f6ef7;
+  }
+ 
+  .model-row:not(.best) .model-score { color: #aaa; }
+ 
+  .best-badge {
+    font-size: 10px;
+    font-weight: 600;
+    background: #4f6ef7;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+ 
+  /* ── STEPS CARD ── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+ 
+  .step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 16px;
+  }
+ 
+  .step:last-child { padding-bottom: 0; }
+ 
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+ 
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #eef2ff;
+    border: 2px solid #4f6ef7;
+    color: #4f6ef7;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+ 
+  .step-line {
+    width: 2px;
+    flex: 1;
+    background: #e5e7eb;
+    margin-top: 4px;
+    min-height: 14px;
+  }
+ 
+  .step:last-child .step-line { display: none; }
+ 
+  .step-text {
+    padding-top: 4px;
+  }
+ 
+  .step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1b4b;
+  }
+ 
+  .step-desc {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+  }
+ 
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 12px;
+    color: #bbb;
+  }
+ 
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .result-price { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+ 
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="tag">Data Science Essentials Project</div>
+  <h1>Car Price Predictor</h1>
+  <p>Predict the resale value of any used car using Machine Learning</p>
+</div>
+ 
+<div class="layout">
+ 
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+ 
+    <!-- INPUT FORM -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-head">
+        <div class="card-icon">🚗</div>
+        <h2>Enter Car Details</h2>
+      </div>
+ 
+      <div class="row-2">
+        <div class="field">
+          <label>Car Name</label>
+          <input type="text" id="car_name" placeholder="e.g. Maruti Swift"/>
+        </div>
+        <div class="field">
+          <label>Year</label>
+          <input type="number" id="year" placeholder="e.g. 2018" min="2000" max="2024"/>
+        </div>
+      </div>
+ 
+      <div class="row-2">
+        <div class="field">
+          <label>Present Price (₹ Lakhs)</label>
+          <input type="number" id="present_price" placeholder="e.g. 9.85" step="0.01"/>
+        </div>
+        <div class="field">
+          <label>Kms Driven</label>
+          <input type="number" id="kms_driven" placeholder="e.g. 35000"/>
+        </div>
+      </div>
+ 
+      <div class="row-2">
+        <div class="field">
+          <label>Fuel Type</label>
+          <select id="fuel_type">
+            <option value="">Select</option>
+            <option>Petrol</option>
+            <option>Diesel</option>
+            <option>CNG</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Transmission</label>
+          <select id="transmission">
+            <option value="">Select</option>
+            <option>Manual</option>
+            <option>Automatic</option>
+          </select>
+        </div>
+      </div>
+ 
+      <div class="row-2">
+        <div class="field">
+          <label>Seller Type</label>
+          <select id="seller_type">
+            <option value="">Select</option>
+            <option>Dealer</option>
+            <option>Individual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>No. of Previous Owners</label>
+          <select id="owner">
+            <option value="0">0 — First owner</option>
+            <option value="1">1 — Second owner</option>
+            <option value="2">2 — Third owner</option>
+            <option value="3">3+ owners</option>
+          </select>
+        </div>
+      </div>
+ 
+      <button class="btn-predict" onclick="predictPrice()">Predict Selling Price</button>
+      <button class="btn-reset" onclick="resetForm()">Clear All Fields</button>
+    </div>
+ 
+    <!-- RESULT CARD -->
+    <div class="result-card" id="result">
+      <div class="result-label">Estimated Selling Price</div>
+      <div class="result-price"><sup>₹</sup><span id="price-out">0.00</span><sub> Lakhs</sub></div>
+      <div class="result-car-name" id="car-name-out">—</div>
+ 
+      <div class="result-metrics">
+        <div class="r-metric">
+          <div class="r-metric-val">0.96</div>
+          <div class="r-metric-lbl">R² Score</div>
+        </div>
+        <div class="r-metric">
+          <div class="r-metric-val">0.82</div>
+          <div class="r-metric-lbl">MAE</div>
+        </div>
+        <div class="r-metric">
+          <div class="r-metric-val" id="dep-out">—</div>
+          <div class="r-metric-lbl">Depreciation</div>
+        </div>
+      </div>
+ 
+      <div class="dep-bar-wrap">
+        <div class="dep-bar-top">
+          <span>Market Price</span>
+          <span>Selling Price</span>
+        </div>
+        <div class="dep-bar-track">
+          <div class="dep-bar-fill" id="dep-bar"></div>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+ 
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+ 
+    <!-- FEATURE IMPORTANCE -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">📊</div>
+        <h2>Feature Importance</h2>
+      </div>
+ 
+      <div class="fi-row">
+        <div class="fi-label">Present Price</div>
+        <div class="fi-track"><div class="fi-fill c1" style="width:87%"></div></div>
+        <div class="fi-pct">87%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Year</div>
+        <div class="fi-track"><div class="fi-fill c2" style="width:62%"></div></div>
+        <div class="fi-pct">62%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Kms Driven</div>
+        <div class="fi-track"><div class="fi-fill c3" style="width:48%"></div></div>
+        <div class="fi-pct">48%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Fuel Type</div>
+        <div class="fi-track"><div class="fi-fill c4" style="width:22%"></div></div>
+        <div class="fi-pct">22%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Transmission</div>
+        <div class="fi-track"><div class="fi-fill c5" style="width:15%"></div></div>
+        <div class="fi-pct">15%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Seller Type</div>
+        <div class="fi-track"><div class="fi-fill c6" style="width:9%"></div></div>
+        <div class="fi-pct">9%</div>
+      </div>
+      <div class="fi-row">
+        <div class="fi-label">Owner</div>
+        <div class="fi-track"><div class="fi-fill c7" style="width:5%"></div></div>
+        <div class="fi-pct">5%</div>
+      </div>
+    </div>
+ 
+    <!-- MODEL COMPARISON -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">🤖</div>
+        <h2>Model Comparison</h2>
+      </div>
+ 
+      <div class="model-row">
+        <div class="model-left">
+          <div class="model-dot"></div>
+          <div>
+            <div class="model-name">Linear Regression</div>
+            <div class="model-desc">Simple straight-line prediction</div>
+          </div>
+        </div>
+        <div class="model-score">0.81</div>
+      </div>
+ 
+      <div class="model-row">
+        <div class="model-left">
+          <div class="model-dot"></div>
+          <div>
+            <div class="model-name">Decision Tree</div>
+            <div class="model-desc">Rule-based if/else splits</div>
+          </div>
+        </div>
+        <div class="model-score">0.88</div>
+      </div>
+ 
+      <div class="model-row best">
+        <div class="model-left">
+          <div class="model-dot"></div>
+          <div>
+            <div class="model-name">
+              Random Forest
+              <span class="best-badge">BEST</span>
+            </div>
+            <div class="model-desc">100 decision trees combined</div>
+          </div>
+        </div>
+        <div class="model-score">0.96</div>
+      </div>
+    </div>
+ 
+    <!-- ALGORITHM STEPS -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon">⚙️</div>
+        <h2>Algorithm Steps</h2>
+      </div>
+ 
+      <div class="steps">
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">Data Collection</div>
+            <div class="step-desc">Load CSV dataset from Kaggle</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">Preprocessing</div>
+            <div class="step-desc">Clean nulls, encode, scale features</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">EDA</div>
+            <div class="step-desc">Visualize patterns and correlations</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">4</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">Train / Test Split</div>
+            <div class="step-desc">80% training · 20% testing</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">5</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">Model Training</div>
+            <div class="step-desc">Random Forest · 100 estimators</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-left">
+            <div class="step-num">6</div>
+          </div>
+          <div class="step-text">
+            <div class="step-title">Evaluation</div>
+            <div class="step-desc">MAE · RMSE · R² Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<div class="footer">
+  Data Science Essentials Project &nbsp;·&nbsp; Random Forest Regressor &nbsp;·&nbsp; sklearn
+</div>
+ 
+<script>
+  // Animate feature bars on page load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.fi-fill').forEach(b => {
+        b.style.transform = 'scaleX(1)';
+      });
+    }, 400);
+  });
+ 
+  function predictPrice() {
+    const carName      = document.getElementById('car_name').value || 'Your Car';
+    const year         = parseInt(document.getElementById('year').value);
+    const presentPrice = parseFloat(document.getElementById('present_price').value);
+    const kmsDriven    = parseInt(document.getElementById('kms_driven').value);
+    const fuelType     = document.getElementById('fuel_type').value;
+    const transmission = document.getElementById('transmission').value;
+    const owner        = parseInt(document.getElementById('owner').value);
+ 
+    if (!year || !presentPrice || !kmsDriven || !fuelType || !transmission) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+ 
+    const age         = 2024 - year;
+    const fuelFactor  = fuelType === 'Diesel' ? 1.08 : fuelType === 'CNG' ? 0.85 : 1.0;
+    const transFactor = transmission === 'Automatic' ? 1.06 : 1.0;
+    const kmPenalty   = Math.min(kmsDriven / 200000, 0.35);
+    const ownerPen    = owner * 0.05;
+    const agePen      = age * 0.07;
+ 
+    let predicted = presentPrice * fuelFactor * transFactor;
+    predicted     = predicted * (1 - kmPenalty - ownerPen - agePen);
+    predicted     = Math.max(predicted, 0.5);
+ 
+    const depPct   = ((presentPrice - predicted) / presentPrice * 100);
+    const barWidth = Math.max(10, Math.min(95, 100 - depPct));
+ 
+    document.getElementById('price-out').textContent   = predicted.toFixed(2);
+    document.getElementById('car-name-out').textContent = carName + ' · ' + year;
+    document.getElementById('dep-out').textContent     = depPct.toFixed(1) + '%';
+    document.getElementById('dep-bar').style.width     = '0%';
+ 
+    const box = document.getElementById('result');
+    box.classList.remove('show');
+    void box.offsetWidth;
+    box.classList.add('show');
+ 
+    setTimeout(() => {
+      document.getElementById('dep-bar').style.width = barWidth + '%';
+    }, 100);
+ 
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+ 
+  function resetForm() {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    document.getElementById('result').classList.remove('show');
+  }
+</script>
+</body>
+</html>
