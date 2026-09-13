@@ -39,7 +39,7 @@ st.markdown("""
         margin-top: 20px;
     }
     .dep-card {
-        background-color: #FFFFFF;
+        background-color: #2196F3;
         border-radius: 12px;
         padding: 20px;
         border-left: 5px solid #E53935;
