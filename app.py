@@ -18,10 +18,10 @@ st.set_page_config(
 st.markdown("""
     <style>
     .main-header {
-        font-size: 2.3rem;
+        font-size: 3rem;
         color: #1E88E5;
         text-align: center;
-        font-weight: 1000;
+        font-weight: 700;
         margin-bottom: 0px;
     }
     .sub-header {
