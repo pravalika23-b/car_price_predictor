@@ -7,80 +7,44 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
-# Page Configuration
+# Page Setup
 st.set_page_config(
-    page_title="Car Price & Depreciation Predictor",
+    page_title="Car Price Predictor",
     page_icon="🚗",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered"
 )
 
-# Custom CSS Styling for Impressive UI
+# Custom Styling (Simple Clean Theme)
 st.markdown("""
     <style>
-    /* Main Background & Font Styling */
-    .stApp {
-        background-color: #f8f9fa;
+    .main-header {
+        font-size: 2.3rem;
+        color: #1E88E5;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 0px;
     }
-    
-    /* Header Container */
-    .header-box {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        padding: 30px;
-        border-radius: 15px;
-        color: white;
+    .sub-header {
+        font-size: 1.05rem;
+        color: #555555;
         text-align: center;
         margin-bottom: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .header-box h1 {
-        color: #ffffff;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    .header-box p {
-        color: #e0e0e0;
-        font-size: 1.1rem;
-    }
-    
-    /* Result Cards */
-    .price-card {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        padding: 25px;
-        border-radius: 15px;
-        color: white;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
-        margin-top: 15px;
-    }
-    .price-card h3 {
-        color: #f0fdf4;
-        margin-bottom: 5px;
-        font-size: 1.2rem;
-    }
-    .price-card h1 {
-        color: #ffffff;
-        font-size: 2.8rem;
-        font-weight: 800;
-        margin: 0;
-    }
-    
-    .dep-card {
-        background: white;
+    .result-card {
+        background-color: #E3F2FD;
+        border-radius: 12px;
         padding: 20px;
-        border-radius: 15px;
-        border-left: 6px solid #e63946;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-top: 15px;
+        text-align: center;
+        border: 2px solid #2196F3;
+        margin-top: 20px;
     }
-    
-    /* Card Container */
-    .form-container {
-        background-color: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+    .dep-card {
+        background-color: #FFFFFF;
+        border-radius: 12px;
+        padding: 20px;
+        border-left: 5px solid #E53935;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-top: 15px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -122,27 +86,21 @@ def train_model(data):
 
 model = train_model(df)
 
-# Top Header Banner
-st.markdown("""
-    <div class="header-box">
-        <h1>🚗 Smart Used Car Price & Value Predictor</h1>
-        <p>AI-Powered Valuation & Depreciation Analysis</p>
-    </div>
-""", unsafe_allow_html=True)
+# Header UI
+st.markdown('<p class="main-header">🚗 Used Car Price Predictor</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Estimate resale value and depreciation using Machine Learning</p>', unsafe_allow_html=True)
 
-# Sidebar UI
-with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/car--v1.png", width=80)
-    st.title("📊 Project Stats")
-    st.markdown("---")
-    st.metric(label="Total Dataset Cars", value=f"{len(df):,}")
-    st.metric(label="Unique Brands", value=f"{df['brand'].nunique()}")
-    st.metric(label="ML Model", value="Random Forest")
-    st.markdown("---")
-    st.info("💡 **Tip:** Entering the original purchase price provides a detailed depreciation breakdown!")
+# Sidebar Info
+st.sidebar.header("📌 About Model")
+st.sidebar.info(
+    """
+    **Algorithm:** Random Forest Regressor  
+    **Dataset Size:** 4,300+ Records  
+    **Features:** Model, Year, Original Price, KMs Driven, Fuel, Transmission, Owner & Seller Type.
+    """
+)
 
-# Input Form Section
-st.markdown('<div class="form-container">', unsafe_allow_html=True)
+# Input Form Layout
 st.subheader("📋 Enter Vehicle Details")
 
 col1, col2 = st.columns(2)
@@ -160,10 +118,10 @@ with col1:
         max_value=10000000,
         value=600000,
         step=25000,
-        help="Enter how much the car was originally bought for."
+        help="Amount the car was originally bought for."
     )
 
-    year = st.number_input("Manufacturing Year", min_value=1990, max_value=2026, value=2017, step=1)
+    year = st.number_input("Manufacturing Year", min_value=1990, max_value=2026, value=2016, step=1)
 
 with col2:
     km_driven = st.number_input("Kilometers Driven", min_value=0, max_value=500000, value=45000, step=1000)
@@ -175,10 +133,10 @@ with col2:
         options=["First Owner", "Second Owner", "Third Owner", "Fourth & Above Owner", "Test Drive Car"],
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("---")
 
-# Predict Button
-if st.button("🚀 Calculate Estimated Market Value", type="primary", use_container_width=True):
+# Predict Button & Results
+if st.button("🔍 Estimate Price & Depreciation", type="primary", use_container_width=True):
     input_data = pd.DataFrame({
         "name": [car_name],
         "year": [year],
@@ -189,49 +147,47 @@ if st.button("🚀 Calculate Estimated Market Value", type="primary", use_contai
         "owner": [owner],
     })
 
-    # Model Prediction
+    # Prediction
     predicted_price = model.predict(input_data)[0]
 
-    # Calculate Depreciation Metrics
+    # Depreciation Calculations
     depreciation_amt = original_price - predicted_price
     depreciation_pct = (depreciation_amt / original_price) * 100 if original_price > 0 else 0
     current_year = datetime.datetime.now().year
     car_age = max(1, current_year - year)
 
-    res_col1, res_col2 = st.columns([1.2, 1])
+    # Main Price Display Card
+    st.markdown(
+        f"""
+        <div class="result-card">
+            <h3 style="color: #0D47A1; margin-bottom: 5px;">Estimated Selling Price</h3>
+            <h1 style="color: #1565C0; margin-top: 0px;">₹ {predicted_price:,.2f}</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    with res_col1:
+    # Depreciation Breakdown Below
+    if depreciation_amt > 0:
         st.markdown(
             f"""
-            <div class="price-card">
-                <h3>Estimated Resale Value</h3>
-                <h1>₹ {predicted_price:,.2f}</h1>
+            <div class="dep-card">
+                <h4 style="color: #D32F2F; margin-top: 0; margin-bottom: 10px;">📉 Depreciation Breakdown</h4>
+                <p style="margin: 4px 0;"><strong>Original Price:</strong> ₹ {original_price:,.2f}</p>
+                <p style="margin: 4px 0;"><strong>Value Retained:</strong> {100 - depreciation_pct:.1f}%</p>
+                <p style="margin: 4px 0;"><strong>Total Value Lost:</strong> ₹ {depreciation_amt:,.2f} ({depreciation_pct:.1f}%)</p>
+                <p style="margin: 4px 0;"><strong>Average Annual Loss:</strong> ₹ {depreciation_amt / car_age:,.2f} / year</p>
             </div>
             """,
             unsafe_allow_html=True
         )
-
-    with res_col2:
-        if depreciation_amt > 0:
-            st.markdown(
-                f"""
-                <div class="dep-card">
-                    <h4 style="color:#e63946; margin-top:0;">📉 Value Depreciation Summary</h4>
-                    <p style="margin:5px 0;"><strong>Original Price:</strong> ₹ {original_price:,.2f}</p>
-                    <p style="margin:5px 0;"><strong>Value Retained:</strong> {100 - depreciation_pct:.1f}%</p>
-                    <p style="margin:5px 0;"><strong>Total Depreciation:</strong> ₹ {depreciation_amt:,.2f} ({depreciation_pct:.1f}%)</p>
-                    <p style="margin:5px 0;"><strong>Est. Annual Loss:</strong> ₹ {depreciation_amt / car_age:,.2f}/yr</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                f"""
-                <div class="dep-card" style="border-left-color: #2a9d8f;">
-                    <h4 style="color:#2a9d8f; margin-top:0;">📈 Value Appreciation Summary</h4>
-                    <p>This vehicle model has retained or gained market value relative to your input original price!</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+    else:
+        st.markdown(
+            f"""
+            <div class="dep-card" style="border-left-color: #388E3C;">
+                <h4 style="color: #388E3C; margin-top: 0; margin-bottom: 10px;">📈 Value Appreciation</h4>
+                <p style="margin: 0;">This vehicle model has retained or gained value relative to your entered purchase price.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
